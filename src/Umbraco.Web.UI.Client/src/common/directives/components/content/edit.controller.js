@@ -149,7 +149,7 @@
 
         function reload() {
             $scope.page.loading = true;
-
+            
             if ($scope.page.isNew) {
                 loadScaffold().then(function () {
                     $scope.page.loading = false;
@@ -222,7 +222,7 @@
             //we are editing so get the content item from the server
             return $scope.getMethod()($scope.contentId)
                 .then(function (data) {
-
+                	
                     $scope.content = data;
 
                     appendRuntimeData();
@@ -441,7 +441,7 @@
             //Set them all to be invalid
             var fieldsToRollback = checkValidility();
             eventsService.emit("content.saving", { content: $scope.content, action: args.action });
-
+            var isNew = $scope.page.isNew;
             return contentEditingHelper.contentEditorPerformSave({
                 saveMethod: args.saveMethod,
                 scope: $scope,
@@ -452,18 +452,24 @@
                 softRedirect: true
             }).then(function (data) {
                 //success
+                $scope.content = data;
                 init();
+
+                //If we have a new page then refresh the content apps
+                if (isNew) {
+                    $scope.$broadcast("editors.apps.refresh", { content: $scope.content });
+                }
 
                 //needs to be manually set for infinite editing mode
                 $scope.page.isNew = false;
-
+                
                 syncTreeNode($scope.content, data.path, false, args.reloadChildren);
 
                 eventsService.emit("content.saved", { content: $scope.content, action: args.action });
 
                 resetNestedFieldValiation(fieldsToRollback);
                 ensureDirtyIsSetIfAnyVariantIsDirty();
-
+                
                 return $q.when(data);
             },
                 function (err) {

@@ -41,7 +41,7 @@
         vm.showBackButton = showBackButton;
 
         function onInit() {
-            
+
             // Make copy of apps, so we can have a variant specific model for the App. (needed for validation etc.)
             vm.editor.variantApps = Utilities.copy(vm.content.apps);
 
@@ -102,6 +102,11 @@
             });
 
             onAppChanged(activeApp);
+        });
+
+        $scope.$on("editors.apps.refresh", function ($event, $args) {
+            vm.content = $args.content;
+            onInit();
         });
 
         function onAppChanged(activeApp) {
